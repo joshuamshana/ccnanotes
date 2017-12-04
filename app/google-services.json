@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "795677138790",
+    "firebase_url": "https://cs243networkdesign.firebaseio.com",
+    "project_id": "cs243networkdesign",
+    "storage_bucket": "cs243networkdesign.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795677138790:android:a36039a641e4e724",
+        "android_client_info": {
+          "package_name": "com.fahamutech.cs243networkdesign"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795677138790-qdctfk6sk2e05kn201v6erstjr4drph9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fahamutech.cs243networkdesign",
+            "certificate_hash": "e4fe176e16e506f257d61bb364f1fab0c0f25b22"
+          }
+        },
+        {
+          "client_id": "795677138790-oi49p20a6i3u24mn9qh17gsdca6ortbp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD71aBjEJKuYeEvk4F7GBw4RV9Rilu6r1g"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "795677138790-oi49p20a6i3u24mn9qh17gsdca6ortbp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
