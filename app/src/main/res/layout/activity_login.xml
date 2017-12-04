@@ -34,8 +34,8 @@
             <ImageView
                 android:id="@+id/imageView2"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:srcCompat="@drawable/common_google_signin_btn_icon_dark" />
+                android:layout_height="216dp"
+                app:srcCompat="@mipmap/icon0" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
