@@ -1,24 +1,34 @@
 package com.fahamutech.cs243networkdesign;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.provider.SyncStateContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.Session;
+import com.dropbox.core.DbxAuthFinish;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.auth.DbxUserAuthRequests;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -30,22 +40,18 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     //Sqlite3 data reference
     private DataStorageSqlite dataStorageSqlite;
-    private GoogleSignInClient googleSignInClient;
+    final static public String DROPBOX_APP_KEY = "bko9232j00d8955";
+    final static public String DROPBOX_APP_SECRET = "ecyqbetrvkf6rr8";
+    private final String DROPBOX_TOKEN=
+            "NUTyAZ8ET4AAAAAAAAAAQXJcN6gD0nzz6K1uZTrsGTytk3jRNQkmoquKjPADmvKa";
+    private DropboxAPI dropboxAPI;
+
+    final static public Session.AccessType ACCESS_TYPE = Session.AccessType.DROPBOX;
 
 
     @Override
@@ -79,49 +85,33 @@ public class MainActivity extends AppCompatActivity
         //************************************************//
         dataStorageSqlite = new DataStorageSqlite(this);
 
-        //drive
-        googleSignInClient=buildGoogleSignInClient();
-        signInAccountTask(googleSignInClient.silentSignIn());
+        //*************************************************//
+        //cloud file server                                //
+        //*************************************************//
+       /* dropboxAPI=new DropboxAPI(buildSession());
+        try {
+            DropboxAPI.Account account = dropboxAPI.accountInfo();
+            AlertDialog.Builder a=new AlertDialog.Builder(this);
+            a.setMessage(account.displayName);
+        } catch (DropboxException e) {
+            e.printStackTrace();
+        }*/
+
+
 
 
     }
 
-    private GoogleSignInClient buildGoogleSignInClient() {
-        GoogleSignInOptions signInOptions =
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestScopes(Drive.SCOPE_FILE)
-                        .build();
-        return GoogleSignIn.getClient(this, signInOptions);
+    private AndroidAuthSession buildSession() {
+        AppKeyPair appKeyPair = new AppKeyPair(DROPBOX_APP_KEY,DROPBOX_APP_SECRET);
+        AndroidAuthSession session;
+
+            AccessTokenPair accessToken = new AccessTokenPair(DROPBOX_APP_KEY,DROPBOX_APP_SECRET);
+            session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE,accessToken);
+
+        return session;
     }
 
-    private void signInAccountTask(final Task<GoogleSignInAccount> task) {
-        Log.i("joshua", "Update view with sign in account task");
-        task.addOnSuccessListener(
-                new OnSuccessListener<GoogleSignInAccount>() {
-                    @Override
-                    public void onSuccess(GoogleSignInAccount googleSignInAccount) {
-                        Log.i("joshua", "Sign in success");
-                        // Build a drive client.
-                        DriveClient mDriveClient = Drive.getDriveClient(getApplicationContext(),
-                                googleSignInAccount);
-                        AlertDialog.Builder a=new AlertDialog.Builder(MainActivity.this);
-
-                        // Build a drive resource client.
-                        DriveResourceClient mDriveResourceClient =
-                                Drive.getDriveResourceClient(getApplicationContext(),
-                                        googleSignInAccount);
-                        //a.setMessage(mDriveClient.getDriveId("")));
-
-                    }
-                })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w("joshua", "Sign in failed", e);
-                            }
-                        });
-    }
 
     private void setWebView(String file) {
         WebView webView = findViewById(R.id.web_view);

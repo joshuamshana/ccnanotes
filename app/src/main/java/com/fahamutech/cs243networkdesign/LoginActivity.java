@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -29,6 +30,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.auth.DbxUserAuthRequests;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +68,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+
+    private final String DROPBOX_TOKEN=
+            "NUTyAZ8ET4AAAAAAAAAAQXJcN6gD0nzz6K1uZTrsGTytk3jRNQkmoquKjPADmvKa";
 
 
     @Override
@@ -338,6 +347,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
                 finish();
+                DbxRequestConfig dbxRequestConfig=new DbxRequestConfig("network design");
+                DbxClientV2 clientV2=new DbxClientV2(dbxRequestConfig,DROPBOX_TOKEN);
+               // DbxUserAuthRequests auth = clientV2.auth();
+                try {
+                    String email = clientV2.users().getCurrentAccount().getEmail();
+                    AlertDialog.Builder a=new AlertDialog.Builder(LoginActivity.this);
+                    a.setMessage(email);
+                } catch (DbxException e) {
+                    e.printStackTrace();
+                }
+
                 Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                 startActivity(intent);
             } else {
