@@ -137,18 +137,31 @@ public class DataStorageSqlite extends SQLiteOpenHelper {
     public ArrayList<String> getAllNotes() {
         ArrayList<String> array_list = new ArrayList<>();
 
-        hp = new HashMap<String, byte[]>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select unit,content from notes", null );
+        Cursor res =  db.rawQuery( "select unit from notes", null );
         res.moveToFirst();
 
         while(!res.isAfterLast()){
             array_list.add(res.getString(res.getColumnIndex(NOTES_COLUMN_UNIT)));
-            hp.put(res.getString(res.getColumnIndex(NOTES_COLUMN_UNIT)),
-                    res.getBlob(res.getColumnIndex(NOTES_COLUMN_CONTENTS)));
             res.moveToNext();
         }
 
         return array_list;
+    }
+
+    public byte[] getContent(String unit) {
+        byte[] data=null;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select distinct content from notes",
+                null );
+        res.moveToFirst();
+
+        while(!res.isAfterLast()){
+            data =(res.getBlob(res.getColumnIndex(NOTES_COLUMN_CONTENTS)));
+            res.moveToNext();
+        }
+
+        return data;
     }
 }

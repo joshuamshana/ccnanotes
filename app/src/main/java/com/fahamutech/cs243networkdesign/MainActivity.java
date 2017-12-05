@@ -58,49 +58,46 @@ public class MainActivity extends AppCompatActivity
         //************************************************//
         //initialize database                             //
         //************************************************//
-        dataStorageSqlite=new DataStorageSqlite(this);
+        dataStorageSqlite = new DataStorageSqlite(this);
         InputStream file = getResources().openRawResource(R.raw.index);
-        dataStorageSqlite.insertNotes("network",1,file);
+        dataStorageSqlite.insertNotes("network", 1, file);
 
         //*******************************************//
         //set a web view to load a local html        //
         //*******************************************//
         ArrayList<String> allNotes = dataStorageSqlite.getAllNotes();
+        AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
 
-        File file1=new File("ht.html");
-        byte[] bytes = DataStorageSqlite.hp.get("network");
-        FileOutputStream fos=null;
+        String fileHtml = "h.html";
+        byte[] bytes = dataStorageSqlite.getContent("network");
+        if (bytes==null) {
+            alertDialog.setMessage("null");
+            alertDialog.show();
+        }
+        FileOutputStream fos = null;
         try {
-
-            fos = new FileOutputStream(file1);
+            fos = openFileOutput(fileHtml, MODE_PRIVATE);
             fos.write(bytes);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (fos!=null) try {
+            if (fos != null) try {
                 fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        setWebView(file1);
+        setWebView(getFilesDir().getAbsolutePath()+"/h.html");
     }
 
-    private void setWebView(File file ) {
+    private void setWebView(String file) {
         WebView webView = findViewById(R.id.web_view);
         webView.canGoBack();
-        URL url=null;
-        try {
 
-            url = file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        assert url != null;
-        webView.loadUrl(file.toURI().getPath());
+        webView.loadUrl(file);
     }
 
     @Override
