@@ -3,6 +3,7 @@ package com.fahamutech.cs243networkdesign;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -57,18 +59,14 @@ public class MainActivity extends AppCompatActivity
         //initialize database                             //
         //************************************************//
         dataStorageSqlite=new DataStorageSqlite(this);
-        InputStream file= null;
-        try {
-            file = this.getAssets().open("file:///android_res/raw/index.html");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        InputStream file = getResources().openRawResource(R.raw.index);
         dataStorageSqlite.insertNotes("network",1,file);
 
         //*******************************************//
         //set a web view to load a local html        //
         //*******************************************//
-        dataStorageSqlite.getAllNotes();
+        ArrayList<String> allNotes = dataStorageSqlite.getAllNotes();
+
         File file1=new File("ht.html");
         byte[] bytes = DataStorageSqlite.hp.get("network");
         FileOutputStream fos=null;
