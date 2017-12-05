@@ -54,7 +54,7 @@ public class DataStorageSqlite extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertNotes (String unit, int version, InputStream content) {
+    public boolean insertNotes (String unit, int version, FileInputStream content) {
         try {
             BufferedInputStream bis = new BufferedInputStream(content);
             ByteArrayOutputStream baf=new ByteArrayOutputStream();

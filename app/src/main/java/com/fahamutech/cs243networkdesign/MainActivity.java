@@ -1,9 +1,13 @@
 package com.fahamutech.cs243networkdesign;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,7 +19,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveClient;
+import com.google.android.gms.drive.DriveResourceClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,15 +45,17 @@ public class MainActivity extends AppCompatActivity
 
     //Sqlite3 data reference
     private DataStorageSqlite dataStorageSqlite;
+    private GoogleSignInClient googleSignInClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -46,9 +64,10 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -59,44 +78,54 @@ public class MainActivity extends AppCompatActivity
         //initialize database                             //
         //************************************************//
         dataStorageSqlite = new DataStorageSqlite(this);
-        InputStream file = getResources().openRawResource(R.raw.index);
-        dataStorageSqlite.insertNotes("network", 1, file);
 
-        //*******************************************//
-        //set a web view to load a local html        //
-        //*******************************************//
-        ArrayList<String> allNotes = dataStorageSqlite.getAllNotes();
-        AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+        //drive
+        googleSignInClient=buildGoogleSignInClient();
+        signInAccountTask(googleSignInClient.silentSignIn());
 
-        String fileHtml = "h.html";
-        byte[] bytes = dataStorageSqlite.getContent("network");
-        if (bytes==null) {
-            alertDialog.setMessage("null");
-            alertDialog.show();
-        }
-        FileOutputStream fos = null;
-        try {
-            fos = openFileOutput(fileHtml, MODE_PRIVATE);
-            fos.write(bytes);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fos != null) try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
-        setWebView(getFilesDir().getAbsolutePath()+"/h.html");
+    }
+
+    private GoogleSignInClient buildGoogleSignInClient() {
+        GoogleSignInOptions signInOptions =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestScopes(Drive.SCOPE_FILE)
+                        .build();
+        return GoogleSignIn.getClient(this, signInOptions);
+    }
+
+    private void signInAccountTask(final Task<GoogleSignInAccount> task) {
+        Log.i("joshua", "Update view with sign in account task");
+        task.addOnSuccessListener(
+                new OnSuccessListener<GoogleSignInAccount>() {
+                    @Override
+                    public void onSuccess(GoogleSignInAccount googleSignInAccount) {
+                        Log.i("joshua", "Sign in success");
+                        // Build a drive client.
+                        DriveClient mDriveClient = Drive.getDriveClient(getApplicationContext(),
+                                googleSignInAccount);
+                        AlertDialog.Builder a=new AlertDialog.Builder(MainActivity.this);
+
+                        // Build a drive resource client.
+                        DriveResourceClient mDriveResourceClient =
+                                Drive.getDriveResourceClient(getApplicationContext(),
+                                        googleSignInAccount);
+                        //a.setMessage(mDriveClient.getDriveId("")));
+
+                    }
+                })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w("joshua", "Sign in failed", e);
+                            }
+                        });
     }
 
     private void setWebView(String file) {
         WebView webView = findViewById(R.id.web_view);
         webView.canGoBack();
-
         webView.loadUrl(file);
     }
 
